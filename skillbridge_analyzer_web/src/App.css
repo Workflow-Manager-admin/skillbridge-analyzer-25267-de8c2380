@@ -177,3 +177,106 @@ a:focus {
   letter-spacing: 2px;
   text-shadow: 0 1px 10px #4f8a8b22;
 }
+
+/* Stepper */
+.sb-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 48px;
+}
+.sb-stepper-circle {
+  background: var(--sb-secondary);
+  color: var(--sb-primary);
+  border: 2.8px solid var(--sb-primary);
+  border-radius: 99px;
+  width: 39px;
+  height: 39px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 21px;
+  margin-right: 0;
+  transition: background .2s;
+  box-shadow: var(--sb-blue-glow);
+}
+.sb-stepper-active {
+  background: var(--sb-accent);
+  color: #fff;
+  border: 3.5px solid var(--sb-primary);
+  box-shadow: var(--sb-pink-glow);
+}
+.sb-stepper-line {
+  border-top: 3px solid var(--sb-accent);
+  min-width: 25px;
+  max-width: 80px;
+  margin: 0 7px 0 7px;
+  border-radius: 2px;
+}
+
+.sb-stepper-done {
+  border-top: 3px solid var(--sb-primary);
+}
+/* Step card */
+.sb-step-card {
+  background: #fff;
+  border-radius: 19px;
+  box-shadow: var(--sb-card-shadow);
+  padding: 42px 32px 38px 32px;
+  border: 2.5px solid var(--sb-secondary);
+  min-height: 318px;
+  margin-bottom: 18px;
+}
+
+/* Buttons for steps, even more vibrant */
+.sb-step-btn,
+.sb-step-btn:visited {
+  background: var(--sb-rainbow1);
+  color: #fff;
+  border-radius: 11px;
+  border: none;
+  padding: 11px 32px;
+  font-weight: 700;
+  font-size: 17px;
+  box-shadow: 0 1px 8px 0 #F76B8A44,0 1.5px 12px #FBD46D22;
+  transition: all .18s;
+  cursor: pointer;
+}
+.sb-step-btn[disabled] {
+  background: #e9e9ec;
+  color: #bbb;
+  opacity: 0.64;
+  box-shadow: none;
+  pointer-events: none;
+}
+.sb-step-btn:hover,
+.sb-step-btn:focus {
+  background: var(--sb-rainbow2);
+  transform: scale(1.034);
+  box-shadow: 0 1px 16px #4f8a8b33;
+  color: #fff;
+}
+.sb-step-btn--done,
+.sb-step-btn--done:visited {
+  background: linear-gradient(90deg, #FBD46D, #F76B8A 95%);
+  color: var(--sb-accent);
+  animation: winner 0.9s infinite alternate;
+  box-shadow: 0 2px 18px #F76B8A66, 0 4px 14px #FBD46D22;
+}
+.sb-step-btn--done[disabled] { color: #fff; opacity: 0.79; }
+
+/* Step helper bubble */
+.step-helper {
+  margin-top: 0.5em;
+  font-size: 15px;
+  border-radius: 8px;
+  box-shadow: 0 1.5px 10px #4F8A8B12;
+  padding: 10px 16px;
+}
+
+/* Animation for winner button */
+@keyframes winner {
+  0% { box-shadow: 0 2px 10px #FBD46D77; transform: scale(1);}
+  100% { box-shadow: 0 2px 18px #F76B8A99; transform: scale(1.06);}
+}
