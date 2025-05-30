@@ -632,94 +632,317 @@ function ProgressTracker({ userSkills, selectedJob }) {
 /**
  * Main Container
  */
+function StepIndicator({ currentStep, steps }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 38,
+      gap: 0,
+    }}>
+      {steps.map((step, idx) => (
+        <React.Fragment key={step.label}>
+          <div style={{
+            background: currentStep === idx
+              ? `linear-gradient(90deg, ${COLORS.primary} 80%, ${COLORS.accent})`
+              : `linear-gradient(120deg, ${COLORS.secondary}, #fff 60%)`,
+            color: currentStep === idx ? '#fff' : COLORS.primary,
+            border: currentStep === idx ? `3.5px solid ${COLORS.accent}` : `1.5px solid ${COLORS.primary}33`,
+            borderRadius: 99,
+            width: 44,
+            minWidth: 44,
+            height: 44,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 700,
+            fontSize: 22,
+            marginRight: 0,
+            boxShadow: currentStep === idx ? '0 2px 10px #F76B8A55' : '0 0px 0px #0000',
+            transition: 'all 0.2s'
+          }}>{idx + 1}</div>
+          {idx < steps.length - 1 && (
+            <div style={{
+              flex: 1,
+              height: 0,
+              borderTop: currentStep > idx
+                ? `3px solid ${COLORS.primary}`
+                : `3px dotted ${COLORS.accent}`,
+              margin: '0 7px 0 7px',
+              minWidth: 25,
+              maxWidth: 90,
+              borderRadius: 2
+            }}></div>
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+function StepTitle({ icon, color, text }) {
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      marginBottom: 24
+    }}>
+      <span style={{
+        padding: "8px 13px",
+        fontSize: 27,
+        borderRadius: "14px",
+        background: color,
+        color: "#fff",
+        boxShadow: '0 2px 10px 0 #3332'
+      }}>{icon}</span>
+      <span style={{
+        fontWeight: 700,
+        fontSize: 23,
+        color,
+        letterSpacing: "1.5px",
+        textShadow: `0 1px 10px ${color}26`
+      }}>{text}</span>
+    </div>
+  );
+}
+
+/**
+ * Config for steps
+ */
+const MAIN_STEPS = [
+  {
+    label: "Skill Assessment",
+    render: ({ userSkills, setUserSkills }) => (
+      <>
+        <StepTitle icon="🎯" color={COLORS.primary} text="Skill Assessment" />
+        <SkillInput userSkills={userSkills} setUserSkills={setUserSkills} />
+        <div className="step-helper" style={{
+          background: COLORS.secondary,
+          color: COLORS.primary,
+          borderRadius: 9,
+          fontWeight: 500,
+          fontSize: 15,
+          marginTop: 18,
+          padding: '8px 16px'
+        }}>
+          List your current skills (add at least one).
+        </div>
+      </>
+    )
+  },
+  {
+    label: "Job Role Selection",
+    render: ({ selectedJob, setSelectedJob }) => (
+      <>
+        <StepTitle icon="💼" color={COLORS.accent} text="Job Role Selection" />
+        <JobRoleSelector selectedJob={selectedJob} setSelectedJob={setSelectedJob} />
+        <div className="step-helper" style={{
+          background: COLORS.secondary,
+          color: COLORS.primary,
+          borderRadius: 9,
+          fontWeight: 500,
+          fontSize: 15,
+          marginTop: 24,
+          padding: '9px 16px'
+        }}>
+          Choose the job role you’re targeting!
+        </div>
+      </>
+    )
+  },
+  {
+    label: "Gap Analysis",
+    render: ({ userSkills, selectedJob }) => (
+      <>
+        <StepTitle icon="🔍" color={COLORS.primary} text="Skill Gap Analysis" />
+        <GapAnalysis userSkills={userSkills} selectedJob={selectedJob} />
+        <SkillGapBarChart userSkills={userSkills} selectedJob={selectedJob} />
+      </>
+    )
+  },
+  {
+    label: "Recommendations",
+    render: ({ userSkills, selectedJob }) => (
+      <>
+        <StepTitle icon="✨" color={COLORS.accent} text="Recommendations" />
+        <Recommendations userSkills={userSkills} selectedJob={selectedJob} />
+      </>
+    )
+  },
+  {
+    label: "Progress Tracking",
+    render: ({ userSkills, selectedJob }) => (
+      <>
+        <StepTitle icon="🚀" color={COLORS.secondary} text="Progress Tracking" />
+        <ProgressTracker userSkills={userSkills} selectedJob={selectedJob} />
+        <div className="step-helper" style={{
+          background: COLORS.primary,
+          color: "#fff",
+          borderRadius: 9,
+          fontWeight: 500,
+          fontSize: 15,
+          marginTop: 26,
+          padding: '12px 16px'
+        }}>
+          Track your progress as you close the gap!
+        </div>
+      </>
+    )
+  }
+];
+
 function App() {
   // Skill state
   const [userSkills, setUserSkills] = useState([]);
   // Job selection state
   const [selectedJob, setSelectedJob] = useState(null);
 
+  // Stepper state
+  const [stepIdx, setStepIdx] = useState(0);
+
+  // Rules for advancing steps
+  function canAdvance(currentStep) {
+    if (currentStep === 0) return userSkills.length > 0;
+    if (currentStep === 1) return !!selectedJob;
+    // Gap, recs, progress - permit advancing regardless (could optionally require a job/skills)
+    return true;
+  }
+
+  function handleNext() {
+    if (stepIdx < MAIN_STEPS.length - 1) {
+      setStepIdx((prev) => prev + 1);
+    }
+  }
+  function handleBack() {
+    if (stepIdx > 0) setStepIdx((prev) => prev - 1);
+  }
+
+  // Render props for all
+  const stepProps = {
+    userSkills, setUserSkills,
+    selectedJob, setSelectedJob,
+  };
+
   return (
-    <div style={{ minHeight: '100vh', background: COLORS.lightBG, color: COLORS.textDark, fontFamily: 'Inter, Arial, sans-serif' }}>
+    <div style={{
+      minHeight: '100vh',
+      background: COLORS.lightBG,
+      color: COLORS.textDark,
+      fontFamily: 'Inter, Arial, sans-serif',
+      position: 'relative'
+    }}>
       <Header />
       <main style={{
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        maxWidth: 1150,
+        flexDirection: "column",
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        maxWidth: 760,
         margin: '0 auto',
-        padding: '48px 24px 40px 24px'
+        padding: '38px 8px 36px 8px'
       }}>
-        {/* Main content grid */}
+        {/* STEP PROGRESS INDICATOR */}
+        <StepIndicator currentStep={stepIdx} steps={MAIN_STEPS} />
+
+        {/* Main vibrant card for current step */}
         <div style={{
-          display: 'flex',
-          flex: 1,
-          width: '100%',
-          gap: 44,
+          width: "100%",
+          maxWidth: 580,
+          background: '#fff',
+          borderRadius: 17,
+          boxShadow: '0 3px 30px 0 #4F8A8B18, 0 2px 10px 0 #F76B8A1A',
+          padding: '42px 32px 38px 32px',
+          minHeight: 318,
+          border: `2.5px solid ${COLORS.secondary}`,
+          marginBottom: 18,
         }}>
-          {/* Left: Inputs */}
-          <div style={{
-            flex: '0 0 335px',
-            background: '#fff',
-            borderRadius: 12,
-            boxShadow: '0 2px 20px 0 #0002',
-            padding: '36px 23px 30px 23px',
-            minWidth: 280,
-            minHeight: 320,
-            border: `1.5px solid ${COLORS.sectionBorder}`
-          }}>
-            <SkillInput userSkills={userSkills} setUserSkills={setUserSkills} />
-            <JobRoleSelector selectedJob={selectedJob} setSelectedJob={setSelectedJob} />
-            <div style={{ marginTop: 34, textAlign: "center" }}>
-              <button
-                className="btn"
-                style={{
-                  background: COLORS.accent,
-                  fontWeight: 600,
-                  fontSize: 16,
-                  padding: '10px 25px',
-                  borderRadius: 6,
-                  marginTop: 16,
-                  transition: "background 0.16s",
-                  boxShadow: "0 1px 4px 0 #0001"
-                }}
-                onClick={() => {
-                  if (!selectedJob) alert("Please select a job!");
-                  else if (!userSkills.length) alert("Please add some skills first!");
-                  // nothing else (purely illustrative, since everything live-updates)
-                }}
-              >Analyze Skill Gap</button>
+          {MAIN_STEPS[stepIdx].render(stepProps)}
+
+          {/* Gap error displays for stepper navigation integrity */}
+          {stepIdx === 0 && userSkills.length === 0 && (
+            <div style={{ color: COLORS.accent, marginTop: 22, fontWeight: 600 }}>
+              Please add at least one skill to proceed.
             </div>
-          </div>
-          {/* Right: Analysis/results */}
+          )}
+          {stepIdx === 1 && !selectedJob && (
+            <div style={{ color: COLORS.accent, marginTop: 22, fontWeight: 600 }}>
+              Please select a target job role to proceed.
+            </div>
+          )}
+
+          {/* Navigation buttons */}
           <div style={{
-            flex: 1,
-            minWidth: 320,
-            background: '#fff',
-            borderRadius: 12,
-            boxShadow: '0 2px 20px 0 #0001',
-            padding: '36px 27px 32px 27px',
-            border: `1.5px solid ${COLORS.sectionBorder}`,
-            minHeight: 320
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: 38
           }}>
-            <GapAnalysis userSkills={userSkills} selectedJob={selectedJob} />
-            <SkillGapBarChart userSkills={userSkills} selectedJob={selectedJob} />
-            <ProgressTracker userSkills={userSkills} selectedJob={selectedJob} />
-            <Recommendations userSkills={userSkills} selectedJob={selectedJob} />
-            {/* CTA if nothing entered */}
-            {!selectedJob &&
-              <div style={{
-                margin: '38px 0 0 0',
-                color: COLORS.textLight,
-                background: COLORS.progressBG,
-                borderRadius: 8,
-                padding: '14px 12px',
-                fontSize: 15,
-                textAlign: 'center',
-              }}>
-                Start by entering your skills and a target job role.<br />
-                <span style={{ color: COLORS.accent }}>Skill gap analysis with recommendations will appear here!</span>
-              </div>
-            }
+            <button
+              className="btn btn-large"
+              style={{
+                background: `linear-gradient(90deg, ${COLORS.primary}, ${COLORS.accent})`,
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: 17,
+                padding: "11px 30px",
+                borderRadius: 10,
+                border: "none",
+                opacity: stepIdx === 0 ? 0.6 : 1,
+                pointerEvents: stepIdx === 0 ? 'none' : 'auto',
+                boxShadow: '0 1px 6px 0 #4F8A8B33',
+                transition: 'all 0.2s'
+              }}
+              onClick={handleBack}
+            >
+              ← Back
+            </button>
+            {stepIdx < MAIN_STEPS.length - 1 ? (
+              <button
+                className="btn btn-large"
+                style={{
+                  background: canAdvance(stepIdx)
+                    ? `linear-gradient(90deg, ${COLORS.accent}, ${COLORS.primary})`
+                    : `${COLORS.sectionBorder}`,
+                  color: canAdvance(stepIdx) ? "#fff" : "#bbb",
+                  fontWeight: 700,
+                  fontSize: 17,
+                  padding: "11px 34px",
+                  borderRadius: 10,
+                  border: "none",
+                  opacity: canAdvance(stepIdx) ? 1 : 0.5,
+                  cursor: canAdvance(stepIdx) ? "pointer" : "not-allowed",
+                  boxShadow: canAdvance(stepIdx) ? '0 1px 8px 0 #F76B8A44' : 'none',
+                  marginLeft: 14,
+                  transition: 'all 0.18s'
+                }}
+                disabled={!canAdvance(stepIdx)}
+                onClick={handleNext}
+              >
+                Next →
+              </button>
+            ) : (
+              <button
+                className="btn btn-large"
+                style={{
+                  background: `linear-gradient(90deg, ${COLORS.secondary}, ${COLORS.primary})`,
+                  color: COLORS.accent,
+                  fontWeight: 700,
+                  fontSize: 17,
+                  padding: "11px 34px",
+                  borderRadius: 10,
+                  border: "none",
+                  boxShadow: '0 2px 8px 0 #F76B8A33',
+                  marginLeft: 14,
+                  transition: 'all 0.15s',
+                  animation: "winner 0.9s infinite alternate"
+                }}
+                disabled
+              >
+                🎉 Done!
+              </button>
+            )}
           </div>
         </div>
       </main>
@@ -737,6 +960,14 @@ function App() {
       }}>
         Powered by <span style={{ color: COLORS.accent, fontWeight: 700 }}>SkillBridge</span> | Your upskilling companion 🚀
       </footer>
+      {/* Vibrant confetti styles for finish */}
+      <style>{`
+        @keyframes winner {
+          0% { box-shadow: 0 2px 10px #FBD46D77; transform: scale(1);}
+          100% { box-shadow: 0 2px 18px #F76B8A99; transform: scale(1.06);}
+        }
+      `}
+      </style>
     </div>
   );
 }

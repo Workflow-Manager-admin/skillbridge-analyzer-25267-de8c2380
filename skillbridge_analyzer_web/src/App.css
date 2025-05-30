@@ -10,6 +10,11 @@
   --sb-accent: #F76B8A;
   --sb-light-bg: #FAFAFA;
   --sb-border: #e5e7eb;
+  --sb-rainbow1: linear-gradient(90deg, #FBD46D 30%, #F76B8A 100%);
+  --sb-rainbow2: linear-gradient(90deg, #4F8A8B 70%, #FBD46D 100%);
+  --sb-blue-glow: 0 0px 10px 2px #4F8A8B44;
+  --sb-pink-glow: 0 0px 12px 2px #F76B8A33;
+  --sb-card-shadow: 0 3px 30px 0 #4F8A8B23, 0 2px 10px 0 #F76B8A12;
 }
 
 body {
